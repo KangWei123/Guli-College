@@ -1,38 +1,15 @@
 import React, { Component } from "react";
-import { Button, Table, Tooltip } from "antd";
+import { Button, Table, Tooltip, Input, message } from "antd";
 import { PlusOutlined, FormOutlined, DeleteOutlined } from "@ant-design/icons";
 import "./index.less";
 
-import { getSubjectList, getSecSubjectList } from "./redux/index";
+import {
+	getSubjectList,
+	getSecSubjectList,
+	updateSubjectList,
+} from "./redux/index";
 import { connect } from "react-redux";
-
-const columns = [
-	{ title: "分类名称", dataIndex: "title", key: "aa" },
-	{
-		title: "操作",
-		dataIndex: "",
-		key: "x",
-		render: () => (
-			<>
-				<Tooltip title="修改课程">
-					<Button
-						icon={<FormOutlined />}
-						type="primary"
-						style={{ marginRight: 20, width: 50 }}
-					></Button>
-				</Tooltip>
-				<Tooltip title="删除课程">
-					<Button
-						icon={<DeleteOutlined />}
-						type="danger"
-						style={{ width: 50 }}
-					></Button>
-				</Tooltip>
-			</>
-		),
-		width: 200,
-	},
-];
+import { reqUpdateSubject } from "@api/edu/subject";
 
 const data = [
 	{
@@ -60,8 +37,15 @@ const data = [
 @connect((state) => ({ subjectList: state.subjectList }), {
 	getSubjectList,
 	getSecSubjectList,
+	updateSubjectList,
 })
 class Subject extends Component {
+	state = {
+		subjectId: "",
+		title: "",
+	};
+
+	current = 1;
 	componentDidMount() {
 		this.props.getSubjectList(1, 5);
 	}
@@ -74,14 +58,126 @@ class Subject extends Component {
 		this.props.getSubjectList(page, pageSize);
 		this.current = page;
 	};
-	current = 1;
+	// 点击新建按钮 跳转到新建页面
+	handleToAdd = () => {
+		this.props.history.push("/edu/subject/add");
+	};
+
+	//点击修改按钮
+	handleUpdate = (record) => () => {
+		this.setState({
+			subjectId: record._id,
+			title: record.title,
+		});
+		this.title = record.title;
+	};
+	//点击取消按钮
+	handleCancel = () => () => {
+		this.setState({
+			subjectId: "",
+		});
+	};
+	//点击确认按钮
+	handleConfirm = (record) => async () => {
+		console.log(this.state.title);
+		if (!this.state.title.trim()) {
+			message.warning("请输入正确内容");
+			return;
+		}
+		if (this.state.title === this.title) {
+			message.warning("请不要输入重复内容");
+			return;
+		}
+		//--------------------------------------
+		await this.props.updateSubjectList(this.state.subjectId, this.state.title);
+		// await reqUpdateSubject(record._id, record.title);
+		message.success("课程修改成功");
+		this.setState({
+			subjectId: "",
+			title: "",
+		});
+		//--------------------------------------
+		// this.props.getSubjectList(1, 10);
+	};
+	// 更改课程分类标题受控组件的事件处理函数
+	handleUpdateChange = (e) => {
+		this.setState({
+			title: e.target.value,
+		});
+	};
 	render() {
+		const columns = [
+			{
+				title: "分类名称",
+				// dataIndex: "title",
+				key: "aa",
+				render: (record) => {
+					if (this.state.subjectId === record._id) {
+						return (
+							<Input
+								style={{ width: 300 }}
+								value={this.state.title}
+								onChange={this.handleUpdateChange}
+							></Input>
+						);
+					}
+					return record.title;
+				},
+			},
+			{
+				title: "操作",
+				dataIndex: "",
+				key: "x",
+				render: (record) => {
+					if (this.state.subjectId === record._id) {
+						return (
+							<>
+								<Button
+									type="primary"
+									style={{ marginRight: 20 }}
+									onClick={this.handleConfirm(record)}
+								>
+									确认
+								</Button>
+
+								<Button type="danger" onClick={this.handleCancel(record)}>
+									取消
+								</Button>
+							</>
+						);
+					} else {
+						return (
+							<>
+								<Tooltip title="修改课程">
+									<Button
+										icon={<FormOutlined />}
+										type="primary"
+										style={{ marginRight: 20, width: 50 }}
+										onClick={this.handleUpdate(record)}
+									></Button>
+								</Tooltip>
+								<Tooltip title="删除课程">
+									<Button
+										icon={<DeleteOutlined />}
+										type="danger"
+										style={{ width: 50 }}
+									></Button>
+								</Tooltip>
+							</>
+						);
+					}
+				},
+				width: 200,
+			},
+		];
+
 		return (
 			<div className="subject">
 				<Button
 					type="primary"
 					icon={<PlusOutlined />}
 					className="subject-button"
+					onClick={this.handleToAdd}
 				>
 					新建
 				</Button>
