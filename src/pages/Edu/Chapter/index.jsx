@@ -92,6 +92,10 @@ class Chapter extends Component {
 			this.props.getLessonList(record._id);
 		}
 	};
+	//点击 新增课程
+	toAddLesson = (data) => () => {
+		this.props.history.push("/edu/chapter/addlesson", data);
+	};
 	render() {
 		const { previewVisible, previewImage, selectedRowKeys } = this.state;
 
@@ -126,8 +130,8 @@ class Chapter extends Component {
 				render: (data) => {
 					return (
 						<div>
-							<Tooltip title="新增课程">
-								<Button type="primary">
+							<Tooltip title="新增课时">
+								<Button type="primary" onClick={this.toAddLesson(data)}>
 									<PlusOutlined />
 								</Button>
 							</Tooltip>

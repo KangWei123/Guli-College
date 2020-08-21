@@ -7,8 +7,9 @@ import "./index.less";
 const { Option } = Select;
 //函数组件
 function SearchForm(props) {
+	//解构
 	const [form] = Form.useForm();
-
+	//点击重置按钮
 	const resetForm = () => {
 		form.resetFields();
 	};
@@ -16,7 +17,9 @@ function SearchForm(props) {
 	useEffect(() => {
 		props.getCourseList();
 	}, []);
+	//点击 查询课程章节
 	const onFinish = (values) => {
+		console.log(111);
 		props.getChapterList(values.courseId);
 	};
 	return (
