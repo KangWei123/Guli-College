@@ -85,12 +85,12 @@ export default class AddSubject extends Component {
 							{menu}
 							<Divider style={{ margin: '4px 0' }} />
 							{this.state.total <= this.state.items.length ?
-								(<div style={{ color: 'red', marginLeft: 10 }}>没有更多数据了</div>) :
+								(<div style={{ color: '#1DA57A', marginLeft: 10 }}>没有更多数据了</div>) :
 								(<Button type='link' onClick={this.handleGetSubject}>点击加载更多...</Button>
 								)}
 						</div>
 					)}>
-						<Select.Option value={1}>
+						<Select.Option value={0}>
 							{'一级菜单'}
 						</Select.Option>
 						{this.state.items.map(item => (<Select.Option value={item._id} key={item._id}>

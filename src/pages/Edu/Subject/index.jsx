@@ -1,43 +1,28 @@
 import React, { Component } from "react";
-import { Button, Table, Tooltip, Input, message } from "antd";
-import { PlusOutlined, FormOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Button, Table, Tooltip, Input, message, Modal } from "antd";
+import {
+	PlusOutlined,
+	FormOutlined,
+	DeleteOutlined,
+	ExclamationCircleOutlined,
+} from "@ant-design/icons";
 import "./index.less";
 
 import {
 	getSubjectList,
 	getSecSubjectList,
 	updateSubjectList,
+	delSubjectList,
+	subjectList,
 } from "./redux/index";
 import { connect } from "react-redux";
 import { reqUpdateSubject } from "@api/edu/subject";
-
-const data = [
-	{
-		key: 1,
-		name: "John Brown",
-		age: 32,
-	},
-	{
-		key: 2,
-		name: "Jim Green",
-		age: 42,
-	},
-	{
-		key: 3,
-		name: "Not Expandable",
-		age: 29,
-	},
-	{
-		key: 4,
-		name: "Joe Black",
-		age: 32,
-	},
-];
 
 @connect((state) => ({ subjectList: state.subjectList }), {
 	getSubjectList,
 	getSecSubjectList,
 	updateSubjectList,
+	delSubjectList,
 })
 class Subject extends Component {
 	state = {
@@ -47,7 +32,7 @@ class Subject extends Component {
 
 	current = 1;
 	componentDidMount() {
-		this.props.getSubjectList(1, 5);
+		this.props.getSubjectList(1, 10);
 	}
 	//点击切换 页面数据的回调
 	handleChange = (page, pageSize) => {
@@ -88,7 +73,6 @@ class Subject extends Component {
 			message.warning("请不要输入重复内容");
 			return;
 		}
-		//--------------------------------------
 		await this.props.updateSubjectList(this.state.subjectId, this.state.title);
 		// await reqUpdateSubject(record._id, record.title);
 		message.success("课程修改成功");
@@ -96,8 +80,39 @@ class Subject extends Component {
 			subjectId: "",
 			title: "",
 		});
-		//--------------------------------------
-		// this.props.getSubjectList(1, 10);
+	};
+	//点击删除
+	handleDel = (record) => () => {
+		Modal.confirm({
+			title: (
+				<div>
+					您确定删除
+					<span style={{ color: "#1DA57A", margin: "0 4px" }}>
+						{record.title}
+					</span>
+					吗？
+				</div>
+			),
+			icon: <ExclamationCircleOutlined />,
+			okText: "确定",
+			okType: "danger",
+			cancelText: "取消",
+			onOk: async () => {
+				//发请求
+				await this.props.delSubjectList(record._id);
+				// this.props.getSubjectList(1, 5);
+				message.success(`删除${record.title}成功`);
+				if (record.parentId === "0") {
+					if (this.page > 1 && this.subjectList.item.length <= 0) {
+						--this.page;
+					}
+					this.props.getSubjectList(this.page, 5);
+				}
+			},
+			onCancel() {
+				message.warning(`已取消删除${record.title}`);
+			},
+		});
 	};
 	// 更改课程分类标题受控组件的事件处理函数
 	handleUpdateChange = (e) => {
@@ -161,6 +176,7 @@ class Subject extends Component {
 										icon={<DeleteOutlined />}
 										type="danger"
 										style={{ width: 50 }}
+										onClick={this.handleDel(record)}
 									></Button>
 								</Tooltip>
 							</>
