@@ -16,6 +16,10 @@ export default class MyUpLoad extends Component {
     }
     this.tokenObj = {}//如果没有，赋值空对象
   }
+  state = {
+    isShowUpLoad: true,
+
+  }
   beforeUpload = (file, fileList) => {
     // 上传文件之前的钩子 若返回 false 则停止上传
     //支持返回一个 Promise 对象，Promise 对象 reject 时则停止上传，resolve 时开始上传
@@ -52,7 +56,10 @@ export default class MyUpLoad extends Component {
       },
       complete: (res) => {
         onSuccess(res)
-        this.props.onChange('http://qfejn2na2.hn-bkt.clouddn.com-' + res.key)
+        this.props.onChange('http://qfejn2na2.hn-bkt.clouddn.com/' + res.key)
+        this.setState({
+          isShowUpLoad: false
+        })
         message.success('上传成功')
       }
     }
@@ -74,6 +81,9 @@ export default class MyUpLoad extends Component {
   //移出视频时
   onRemove = () => {
     this.props.onChange('')
+    this.setState({
+      isShowUpLoad: true
+    })
   }
   render() {
     return (
@@ -83,9 +93,12 @@ export default class MyUpLoad extends Component {
           customRequest={this.customRequest}
           onRemove={this.onRemove}
         >
-          <Button>
-            <UploadOutlined /> 上传视频
+          {this.state.isShowUpLoad && (
+            <Button>
+              <UploadOutlined /> 上传视频
             </Button>
+          )}
+
         </Upload>
       </div>
     )

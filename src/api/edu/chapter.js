@@ -14,3 +14,27 @@ export function reqgetChapterList(courseId) {
     }
   })
 }
+
+// 章节管理 - 批量删除多个章节 DELETE
+// http://localhost:5000/admin/edu/chapter/batchRemove
+export function reqBatchRemoveChapterList(chapterIdList) {
+  return request({
+    url: `${BASE_URL}/chapter/batchRemove`,
+    method: 'DELETE',
+    data: {
+      idList: chapterIdList
+    }
+  })
+}
+
+// 课时管理 - 批量删除多个课时 DELETE
+// http://localhost:5000/admin/edu/lesson/batchRemove
+export function reqBatchRemoveLessonList(lessonIdList) {
+  return request({
+    url: `/admin/edu/lesson/batchRemove`,
+    method: 'DELETE',
+    data: {
+      idList: lessonIdList
+    }
+  })
+}

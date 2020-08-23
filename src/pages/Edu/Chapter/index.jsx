@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Button, message, Tooltip, Modal, Alert, Table } from "antd";
+import Player from "griffith";
 import {
 	FullscreenOutlined,
 	RedoOutlined,
@@ -12,7 +13,11 @@ import {
 import dayjs from "dayjs";
 
 import relativeTime from "dayjs/plugin/relativeTime";
-import { getLessonList } from "./redux";
+import {
+	getLessonList,
+	batchRemoveChapterList,
+	batchRemoveLessonList,
+} from "./redux";
 import { connect } from "react-redux";
 import SearchForm from "./SearchForm";
 
@@ -24,7 +29,7 @@ dayjs.extend(relativeTime);
 	(state) => ({
 		chapterList: state.chapterReducer.chapterList,
 	}),
-	{ getLessonList }
+	{ getLessonList, batchRemoveChapterList, batchRemoveLessonList }
 )
 class Chapter extends Component {
 	state = {
@@ -32,6 +37,7 @@ class Chapter extends Component {
 		previewVisible: false,
 		previewImage: "",
 		selectedRowKeys: [],
+		play_url: "",
 	};
 
 	showImgModal = (img) => {
@@ -96,6 +102,40 @@ class Chapter extends Component {
 	toAddLesson = (data) => () => {
 		this.props.history.push("/edu/chapter/addlesson", data);
 	};
+	//点击预览视频
+	handlePreviewViedo = (record) => () => {
+		this.setState({
+			previewVisible: true,
+			play_url: record.video,
+		});
+	};
+	//批量删除
+	batchRemove = () => {
+		//获取参数(章节idList/课时idList) ---> 发送请求
+		const chapterList = this.props.chapterList; //章节数据
+		const selectedRowKeys = this.state.selectedRowKeys; //选中的id(章节/课时都有)
+
+		const chapterIdList = [];
+		chapterList.filter((item) => {
+			//章节id
+			if (selectedRowKeys.indexOf(item._id) !== -1) {
+				//找到了
+				chapterIdList.push(item._id);
+			}
+			return false;
+		});
+
+		const lessonIdList = selectedRowKeys.filter((item) => {
+			//所有id
+			if (chapterIdList.indexOf(item) > -1) {
+				return false;
+			}
+			return true;
+		});
+		console.log(chapterIdList, lessonIdList);
+		this.props.batchRemoveChapterList(chapterIdList);
+		this.props.batchRemoveLessonList(lessonIdList);
+	};
 	render() {
 		const { previewVisible, previewImage, selectedRowKeys } = this.state;
 
@@ -115,10 +155,12 @@ class Chapter extends Component {
 				title: "视频",
 				// dataIndex: "_id",
 				render: (record) => {
-					console.log(record);
-					// console.log(record.children[0].free);
 					if (record.free) {
-						return <Button>预览视频</Button>;
+						return (
+							<Button onClick={this.handlePreviewViedo(record)}>
+								预览视频
+							</Button>
+						);
 					}
 					return null;
 				},
@@ -188,7 +230,22 @@ class Chapter extends Component {
 			//   }
 			// ]
 		};
-
+		const sources = {
+			//高清
+			hd: {
+				play_url: this.state.play_url,
+				bitrate: 1,
+				duration: 1000,
+				format: "",
+				height: 500,
+				size: 160000,
+				width: 500,
+			},
+			//标清
+			// sd: {
+			// 	play_url: "https://zhstatic.zhihu.com/cfe/griffith/zhihu2018_sd.mp4",
+			// },
+		};
 		return (
 			<div>
 				<div className="course-search">
@@ -202,7 +259,11 @@ class Chapter extends Component {
 								<PlusOutlined />
 								<span>新增</span>
 							</Button>
-							<Button type="danger" style={{ marginRight: 10 }}>
+							<Button
+								type="danger"
+								style={{ marginRight: 10 }}
+								onClick={this.batchRemove}
+							>
 								<span>批量删除</span>
 							</Button>
 							<Tooltip title="全屏" className="course-table-btn">
@@ -241,10 +302,17 @@ class Chapter extends Component {
 
 				<Modal
 					visible={previewVisible}
+					title="预览视频"
 					footer={null}
 					onCancel={this.handleImgModal}
+					destroyOnClose={true}
 				>
-					<img alt="example" style={{ width: "100%" }} src={previewImage} />
+					<Player
+						sources={sources}
+						id={"1"}
+						duration={1000}
+						cover={"http://localhost:3000/logo512.png"}
+					></Player>
 				</Modal>
 			</div>
 		);

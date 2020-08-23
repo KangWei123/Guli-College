@@ -19,13 +19,17 @@ const layout = {
 }
 export default class AddLesson extends Component {
 
+
   onFinish = async (values) => {
     // { chapterId, title, free, video }
+
+    // console.log(this.props.location);
     let { title, free, video } = values
     let data = {
       title, free, video,
-      chapterId: this.props.location.state.chapterId
+      chapterId: this.props.location.state._id
     }
+    // console.log(data);
     await addLesson(data)
     message.success('添加课时成功')
     this.props.history.push('/edu/chapter/list')
@@ -86,7 +90,8 @@ export default class AddLesson extends Component {
           {/* htmlType的值是submit,表示这个按钮是一个提交按钮 */}
           <Button type='primary' htmlType='submit'>
             保存
-          </Button>
+            </Button>
+
         </Form.Item>
       </Form>
     </Card >;
