@@ -2,11 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Form, Input, Select, Cascader, Button } from "antd";
 import { reqAllSubject, reqSecSubject } from "@api/edu/subject";
 import { reqGetAllTeacherList } from "@api/edu/teacher";
+import { getCourseList } from "../redux";
+import { connect } from "react-redux";
 import "./index.less";
+// 在要实现国际化的页面中
+// 引入FormattedMessage
+import { FormattedMessage } from "react-intl";
 
 const { Option } = Select;
 
-function SearchForm() {
+function SearchForm(props) {
 	//定义数据
 	const [subjects, setSubjects] = useState([]);
 	const [teachers, setTeachers] = useState([]);
@@ -79,17 +84,22 @@ function SearchForm() {
 		// 调用setOptions ,修改值让视图重新渲染
 		setOptions([...options]);
 	};
-
+	//重置
 	const resetForm = () => {
 		form.resetFields();
 	};
+	//查询
+	const onFinish = () => {
+		//发送请求 获取数据
+		props.getCourseList();
+	};
 
 	return (
-		<Form layout="inline" form={form}>
-			<Form.Item name="title" label="标题">
+		<Form layout="inline" form={form} onFinish={onFinish}>
+			<Form.Item name="title" label={<FormattedMessage id="title" />}>
 				<Input placeholder="课程标题" style={{ width: 250, marginRight: 20 }} />
 			</Form.Item>
-			<Form.Item name="teacherId" label="讲师">
+			<Form.Item name="teacherId" label={<FormattedMessage id="teacher" />}>
 				<Select
 					allowClear
 					placeholder="课程讲师"
@@ -102,7 +112,7 @@ function SearchForm() {
 					))}
 				</Select>
 			</Form.Item>
-			<Form.Item name="subject" label="分类">
+			<Form.Item name="subject" label={<FormattedMessage id="subject" />}>
 				<Cascader
 					style={{ width: 250, marginRight: 20 }}
 					options={options}
@@ -122,12 +132,16 @@ function SearchForm() {
 					htmlType="submit"
 					style={{ margin: "0 10px 0 30px" }}
 				>
-					查询
+					{/* 查询 */}
+					<FormattedMessage id="serachBtn" />
 				</Button>
-				<Button onClick={resetForm}>重置</Button>
+				<Button onClick={resetForm}>
+					{/* 重置 */}
+					<FormattedMessage id="resetBtn" />
+				</Button>
 			</Form.Item>
 		</Form>
 	);
 }
 
-export default SearchForm;
+export default connect(null, { getCourseList })(SearchForm);

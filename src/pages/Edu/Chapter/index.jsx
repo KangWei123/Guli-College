@@ -20,7 +20,7 @@ import {
 } from "./redux";
 import { connect } from "react-redux";
 import SearchForm from "./SearchForm";
-
+import screenfull from "screenfull";
 import "./index.less";
 
 dayjs.extend(relativeTime);
@@ -136,6 +136,16 @@ class Chapter extends Component {
 		this.props.batchRemoveChapterList(chapterIdList);
 		this.props.batchRemoveLessonList(lessonIdList);
 	};
+	//全屏
+	screenfull = () => {
+		// 调用方法
+		// 整个页面全屏 只能打开全屏, 按esc键退出全屏
+		// screenfull.request();
+
+		// 点击全屏按钮,可以展开也可以关闭
+		screenfull.toggle();
+	};
+
 	render() {
 		const { previewVisible, previewImage, selectedRowKeys } = this.state;
 
@@ -266,7 +276,11 @@ class Chapter extends Component {
 							>
 								<span>批量删除</span>
 							</Button>
-							<Tooltip title="全屏" className="course-table-btn">
+							<Tooltip
+								title="全屏"
+								className="course-table-btn"
+								onClick={this.screenfull}
+							>
 								<FullscreenOutlined />
 							</Tooltip>
 							<Tooltip title="刷新" className="course-table-btn">
