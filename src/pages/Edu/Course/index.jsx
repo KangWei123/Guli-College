@@ -37,7 +37,7 @@ class Course extends Component {
 		previewVisible: false,
 		previewImage: "",
 	};
-
+	//搜索
 	search = (searchName) => {
 		this.setState({
 			searchLoading: true,
@@ -53,8 +53,6 @@ class Course extends Component {
 	};
 
 	renderTableItem = () => {
-		// const { permissionValueList } = this.props;
-
 		return (
 			<div>
 				<Tooltip title="发布课程">
@@ -223,6 +221,7 @@ class Course extends Component {
 			previewImage,
 		} = this.state;
 
+		// #region
 		// const courseList = [
 		// 	{
 		// 		_id: 5,
@@ -627,6 +626,7 @@ class Course extends Component {
 		// 		index: index + 1,
 		// 	};
 		// });
+		//#endregion
 
 		// const total = courseList.length;
 		let courseList = [...this.props.courseList];

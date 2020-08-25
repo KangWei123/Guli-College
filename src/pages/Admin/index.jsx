@@ -3,6 +3,7 @@ import { Row, Col, Statistic, Progress } from "antd";
 import Card from "@comps/Card";
 import { CaretUpOutlined, CaretDownOutlined } from "@ant-design/icons";
 import { AreaChart, ColumnChart } from "bizcharts";
+import Scales from "./Scales";
 // 数据源
 const columdata = [
 	{
@@ -156,6 +157,7 @@ export default class Admin extends Component {
 						</Card>
 					</Col>
 				</Row>
+				<Scales></Scales>
 			</div>
 		);
 	}
