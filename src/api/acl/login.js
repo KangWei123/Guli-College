@@ -28,6 +28,18 @@ export function reqLogin(username, password) {
     },
   });
 }
+// 手机验证码登录POST
+// http://localhost:5000/oauth/mobile
+export function reqMobileLogin(mobile, code) {
+  return request({
+    url: `/oauth/mobile`,
+    method: "POST",
+    data: {
+      mobile,
+      code,
+    },
+  });
+}
 
 // 登出
 export function reqLogout() {

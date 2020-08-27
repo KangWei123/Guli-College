@@ -43,5 +43,5 @@ export default {
   Center,
   Subject,
   AddSubject,
-  AddLesson
+  AddLesson,
 };

@@ -12,7 +12,7 @@ import {
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 
-import { login } from "@redux/actions/login";
+import { login, mobileLogin } from "@redux/actions/login";
 import { reqVerificationCode } from "@api/acl/oauth";
 import "./index.less";
 // 使用form表单-->动态校验
@@ -35,25 +35,43 @@ const validator = (rule, value) => {
 		return resolve();
 	});
 };
-
+let loginType = "user";
 function LoginForm(props) {
 	const [form] = Form.useForm(); //得到form实例
 	const [isShowBtn, setIsShowBtn] = useState(true);
 	let [countiongDown, setCountiongDown] = useState(5);
-	const onFinish = ({ username, password }) => {
-		props.login(username, password).then((token) => {
-			// 登录成功
-			// console.log("登陆成功~");
-			// 持久存储token
-			localStorage.setItem("user_token", token);
-			props.history.replace("/");
-		});
-		// .catch(error => {
-		//   notification.error({
-		//     message: "登录失败",
-		//     description: error
-		//   });
-		// });
+	//点击登录
+	const onFinish = () => {
+		if (loginType === "user") {
+			//账号密码登录
+			//手动验证
+			form.validateFields(["username", "password"]).then((res) => {
+				const { username, password } = res;
+				props.login(username, password).then((token) => {
+					// 登录成功
+					// console.log("登陆成功~");
+					// 持久存储token
+					localStorage.setItem("user_token", token);
+					props.history.replace("/");
+				});
+			});
+		} else {
+			// 手机验证码登录
+			form.validateFields(["phone", "verify"]).then((res) => {
+				const { phone, verify } = res;
+				props.mobileLogin(phone, verify).then((token) => {
+					// 登录成功
+					// console.log("登陆成功~");
+					// 持久存储token
+					localStorage.setItem("user_token", token);
+					props.history.replace("/");
+				});
+			});
+		}
+	};
+	//切换选项卡
+	const tabOnChange = (values) => {
+		loginType = values;
 	};
 	//点击获取验证码按钮
 	const getCode = () => {
@@ -65,6 +83,7 @@ function LoginForm(props) {
 				message.success("验证码发送成功");
 				//改变按钮状态
 				setIsShowBtn(false);
+
 				let timeId = setInterval(() => {
 					setCountiongDown(--countiongDown);
 					if (countiongDown <= 0) {
@@ -78,6 +97,13 @@ function LoginForm(props) {
 				//校验失败,触发catch
 			});
 	};
+	//点击github登录
+	const handleGitHubLogin = () => {
+		// 修改浏览器地址栏地址,让浏览器发送请求给git.要上传client_id
+		// 登记之后会获取到client_id
+		//window.location.href 强制跳转/get请求
+		window.location.href = `https://github.com/login/oauth/authorize?client_id=f61c2441724f47d34d83`;
+	};
 	return (
 		<>
 			<Form
@@ -85,11 +111,11 @@ function LoginForm(props) {
 				name="normal_login"
 				className="login-form"
 				initialValues={{ remember: true }}
-				onFinish={onFinish}
 			>
 				<Tabs
 					defaultActiveKey="user"
 					tabBarStyle={{ display: "flex", justifyContent: "center" }}
+					onChange={tabOnChange}
 				>
 					<TabPane tab="账户密码登陆" key="user">
 						<Form.Item
@@ -142,7 +168,19 @@ function LoginForm(props) {
 
 						<Row justify="space-between">
 							<Col span={16}>
-								<Form.Item name="verify">
+								<Form.Item
+									name="verify"
+									rules={[
+										{
+											required: true,
+											message: "请输入验证码",
+										},
+										{
+											pattern: /^[\d]{6}$/,
+											message: "验证码格式不正确",
+										},
+									]}
+								>
 									<Input
 										prefix={<MailOutlined className="form-icon" />}
 										placeholder="验证码"
@@ -176,7 +214,7 @@ function LoginForm(props) {
 				<Form.Item>
 					<Button
 						type="primary"
-						htmlType="submit"
+						onClick={onFinish}
 						className="login-form-button"
 					>
 						登陆
@@ -187,7 +225,10 @@ function LoginForm(props) {
 						<Col span={16}>
 							<span>
 								其他登陆方式
-								<GithubOutlined className="login-icon" />
+								<GithubOutlined
+									className="login-icon"
+									onClick={handleGitHubLogin}
+								/>
 								<WechatOutlined className="login-icon" />
 								<QqOutlined className="login-icon" />
 							</span>
@@ -202,4 +243,4 @@ function LoginForm(props) {
 	);
 }
 
-export default withRouter(connect(null, login)(LoginForm));
+export default withRouter(connect(null, { login, mobileLogin })(LoginForm));
