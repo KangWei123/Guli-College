@@ -28,6 +28,7 @@ dayjs.extend(relativeTime);
 @connect(
 	(state) => ({
 		chapterList: state.chapterReducer.chapterList,
+		permissionValueList: state.user.permissionValueList,
 	}),
 	{ getLessonList, batchRemoveChapterList, batchRemoveLessonList }
 )
@@ -182,11 +183,14 @@ class Chapter extends Component {
 				render: (data) => {
 					return (
 						<div>
-							<Tooltip title="新增课时">
-								<Button type="primary" onClick={this.toAddLesson(data)}>
-									<PlusOutlined />
-								</Button>
-							</Tooltip>
+							{index > -1 && (
+								<Tooltip title="新增课时">
+									<Button type="primary" onClick={this.toAddLesson(data)}>
+										<PlusOutlined />
+									</Button>
+								</Tooltip>
+							)}
+
 							<Tooltip title="更新章节">
 								<Button type="primary" style={{ margin: "0 10px" }}>
 									<FormOutlined />
@@ -256,6 +260,8 @@ class Chapter extends Component {
 			// 	play_url: "https://zhstatic.zhihu.com/cfe/griffith/zhihu2018_sd.mp4",
 			// },
 		};
+		console.log(this.props.permissionValueList);
+		const index = this.props.permissionValueList.indexOf("chapter.addlesson");
 		return (
 			<div>
 				<div className="course-search">
